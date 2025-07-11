@@ -114,6 +114,8 @@ class EOA(Address):
             private_key = PrivateKey(Hash(key))
             public_key = private_key.public_key
             address = Address(keccak256(public_key.format(compressed=False)[1:])[32 - 20 :])
+            print(f"private_key: {private_key}")
+            print(f"address: {address}")
         elif isinstance(address, EOA):
             return address
         instance = super(EOA, cls).__new__(cls, address)

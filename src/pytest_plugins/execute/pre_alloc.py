@@ -61,7 +61,7 @@ def pytest_addoption(parser):
         "--eoa-fund-amount-default",
         action="store",
         dest="eoa_fund_amount_default",
-        default=10**18,
+        default=1000000000000000000,
         type=int,
         help="The default amount of wei to fund each EOA in each test with.",
     )
@@ -425,20 +425,22 @@ def pre(
     refund_txs = []
     for eoa in pre._funded_eoa:
         remaining_balance = eth_rpc.get_balance(eoa)
+        print(f"remaining_balance: {remaining_balance}")
         eoa.nonce = Number(eth_rpc.get_transaction_count(eoa))
-        refund_gas_limit = 21_000
-        tx_cost = refund_gas_limit * default_gas_price
+        refund_gas_limit = 15000000
+        tx_cost = refund_gas_limit * 1100000 * 2
         if remaining_balance < tx_cost:
             continue
         refund_txs.append(
             Transaction(
                 sender=eoa,
                 to=sender_key,
-                gas_limit=21_000,
-                gas_price=default_gas_price,
+                gas_limit=15000000,
+                gas_price=1100000,
                 value=remaining_balance - tx_cost,
             ).with_signature_and_sender()
         )
+    print(f"refund_txs: {refund_txs}")
     eth_rpc.send_wait_transactions(refund_txs)
 
     # Record the ending balance of the sender

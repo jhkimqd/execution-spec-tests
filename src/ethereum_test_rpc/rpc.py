@@ -91,6 +91,8 @@ class BaseRPC:
         }
         headers = base_header | self.extra_headers | extra_headers
 
+        print(f"Payload: {payload}")
+
         response = requests.post(self.url, json=payload, headers=headers)
         response.raise_for_status()
         response_json = response.json()
@@ -187,6 +189,7 @@ class EthRPC(BaseRPC):
     def send_transaction(self, transaction: Transaction) -> Hash:
         """`eth_sendRawTransaction`: Send a transaction to the client."""
         try:
+            print(f"Transaction: {transaction}")
             result_hash = Hash(
                 self.post_request("sendRawTransaction", f"{transaction.rlp().hex()}")
             )
@@ -194,6 +197,7 @@ class EthRPC(BaseRPC):
             assert result_hash is not None
             return transaction.hash
         except Exception as e:
+            print(f"Transaction: {transaction}")
             raise SendTransactionExceptionError(str(e), tx=transaction) from e
 
     def send_transactions(self, transactions: List[Transaction]) -> List[Hash]:

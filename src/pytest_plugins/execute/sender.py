@@ -24,7 +24,7 @@ def pytest_addoption(parser):
         action="store",
         dest="seed_account_sweep_amount",
         type=Wei,
-        default=None,
+        default=100000000000000000000,
         help="Amount of wei to sweep from the seed account to the sender account. "
         "Default=None (Entire balance)",
     )
@@ -34,7 +34,7 @@ def pytest_addoption(parser):
         action="store",
         dest="sender_funding_transactions_gas_price",
         type=Wei,
-        default=None,
+        default=1100000,
         help=("Gas price set for the funding transactions of each worker's sender key."),
     )
 
@@ -43,7 +43,7 @@ def pytest_addoption(parser):
         action="store",
         dest="sender_fund_refund_gas_limit",
         type=Wei,
-        default=21_000,
+        default=15000000,
         help=("Gas limit set for the funding transactions of each worker's sender key."),
     )
 
@@ -165,6 +165,7 @@ def sender_key(
 
     # refund seed sender
     remaining_balance = eth_rpc.get_balance(sender)
+    print(f"remaining_balance: {remaining_balance}")
     sender.nonce = Number(eth_rpc.get_transaction_count(sender))
     used_balance = sender_key_initial_balance - remaining_balance
     request.config.stash[metadata_key]["Senders"][str(sender)] = (
@@ -174,22 +175,27 @@ def sender_key(
     refund_gas_limit = sender_fund_refund_gas_limit
     # double the gas price to ensure the transaction is included and overwrites any other
     # transaction that might have been sent by the sender.
-    refund_gas_price = sender_funding_transactions_gas_price * 2
-    tx_cost = refund_gas_limit * refund_gas_price
+    refund_gas_price = sender_funding_transactions_gas_price * 1.1
+    tx_cost = refund_gas_limit * refund_gas_price * 2
 
     if (remaining_balance - 1) < tx_cost:
         return
 
     # Update the nonce of the sender in case one of the pre-alloc transactions failed
     sender.nonce = Number(eth_rpc.get_transaction_count(sender))
+    print(f"remaining_balance: {remaining_balance}")
+    print(f"tx_cost: {tx_cost}")
+    print(f"refund_gas_limit: {refund_gas_limit}")
+    print(f"refund_gas_price: {refund_gas_price}")
 
     refund_tx = Transaction(
         sender=sender,
         to=seed_sender,
         gas_limit=refund_gas_limit,
-        gas_price=refund_gas_price,
-        value=remaining_balance - tx_cost - 1,
+        gas_price=int(refund_gas_price),
+        value=int(remaining_balance - tx_cost - 1),
     ).with_signature_and_sender()
+    print(f"refund_tx: {refund_tx}")
 
     eth_rpc.send_wait_transaction(refund_tx)
 

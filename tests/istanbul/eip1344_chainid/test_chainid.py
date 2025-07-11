@@ -28,15 +28,22 @@ def test_chainid(state_test: StateTestFiller, pre: Alloc):
 
     tx = Transaction(
         ty=0x0,
-        chain_id=0x01,
+        # chain_id=0x301824, # 3151908
+        chain_id=0x20D5E4,  # 2151908
         to=contract_address,
-        gas_limit=100000000,
-        gas_price=10,
+        gas_price=1100000,
+        gas_limit=15000000,
         sender=sender,
     )
 
+    # Log transaction details
+    print(f"Transaction: {tx}")
+    print(f"Chain ID: {hex(tx.chain_id)}")
+    print(f"Contract address: {contract_address}")
+
     post = {
-        contract_address: Account(storage={"0x01": "0x01"}),
+        # contract_address: Account(storage={"0x01": "0x301824"}),
+        contract_address: Account(storage={"0x01": "0x20D5E4"}),
     }
 
     state_test(env=env, pre=pre, post=post, tx=tx)
