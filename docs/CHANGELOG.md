@@ -10,6 +10,11 @@ Test fixtures for use by clients are available for each release on the [Github r
 
 - Python 3.10 support was removed in this release ([#1808](https://github.com/ethereum/execution-spec-tests/pull/1808)).
 
+#### 💥 Important Change for test contributors
+
+- EEST no longer allows usage of Yul code in Python tests. From now on, please make use of our opcode wrapper. Yul code is now only allowed in the "static tests" located in `./tests/static/` (these are test cases defined by JSON and YAML files instead of Python test functions that were originally maintained in [ethereum/tests](https://github.com/ethereum/tests)).
+- In order to fill the static tests (which is not the case by default), please ensure that `solc` is located in your `PATH`.
+
 #### 💥 Important Change for `fill` Users
 
 The output behavior of `fill` has changed ([#1608](https://github.com/ethereum/execution-spec-tests/pull/1608)):
@@ -21,11 +26,17 @@ The output behavior of `fill` has changed ([#1608](https://github.com/ethereum/e
 
 Due to the crossover between `zkevm` and `benchmark` tests, all instances of the former have been replaced with the latter nomenclature. Repository PR labels and titles are additionally updated to reflect this change.
 
-This update renames the `zkevm` feature release to `benchmark_30M` and further expands the latter for 60M, 90M, and 120M block gas limits in `fixtures_benchmark_30M.tar.gz`, `fixtures_benchmark_60M.tar.gz`, `fixtures_benchmark_90M.tar.gz`, and `fixtures_benchmark_120M.tar.gz` respectively.
+This update renames the `zkevm` feature release to `benchmark_30M` and further expands the latter for 1M, 10M, 60M, 90M, and 120M block gas limits in `fixtures_benchmark_1M.tar.gz`, `fixtures_benchmark_10M.tar.gz`, `fixtures_benchmark_30M.tar.gz`, `fixtures_benchmark_60M.tar.gz`, `fixtures_benchmark_90M.tar.gz`, and `fixtures_benchmark_120M.tar.gz` respectively.
 
 Users can select any of the artifacts depending on their testing needs for their provers.
 
 ### 🛠️ Framework
+
+#### 🔀 Refactoring
+
+- 🔀 Move `TransactionType` enum from test file to proper module location in `ethereum_test_types.transaction_types` for better code organization and reusability.
+- ✨ Opcode classes now validate keyword arguments and raise `ValueError` with clear error messages.
+- 🔀 This PR removes the `solc` requirement to fill Python test cases. Regular test contributors no longer need to concern themselves with `solc` and, as such, the `solc-select` dependency has been removed. The remaining tests that used Yul have been ported to the EEST opcode wrapper mini-lang and the use of Yul in Python tests is no longer supported. Maintainers only: To fill the "static" JSON and YAML tests (`./tests/static/`) locally, `solc` (ideally v0.8.24) must be available in your PATH.
 
 #### `fill`
 
@@ -85,7 +96,7 @@ Users can select any of the artifacts depending on their testing needs for their
 - ✨ EIP-7594: Sanity test cases to send blob transactions and verify `engine_getBlobsVX` using the `execute` command ([#1644](https://github.com/ethereum/execution-spec-tests/pull/1644)).
 - 🔀 Refactored EIP-145 static tests into python ([#1683](https://github.com/ethereum/execution-spec-tests/pull/1683)).
 - ✨ EIP-7823, EIP-7883: Add test cases for ModExp precompile gas-cost updates and input limits on Osaka ([#1579](https://github.com/ethereum/execution-spec-tests/pull/1579), [#1729](https://github.com/ethereum/execution-spec-tests/pull/1729)).
-- ✨ [EIP-7825](https://eips.ethereum.org/EIPS/eip-7825): Add test cases for the transaction gas limit of 30M gas ([#1711](https://github.com/ethereum/execution-spec-tests/pull/1711)).
+- ✨ [EIP-7825](https://eips.ethereum.org/EIPS/eip-7825): Add test cases for the transaction gas limit of 2^24 gas ([#1711](https://github.com/ethereum/execution-spec-tests/pull/1711), [#1882](https://github.com/ethereum/execution-spec-tests/pull/1882)).
 - ✨ [EIP-7951](https://eips.ethereum.org/EIPS/eip-7951): add test cases for `P256VERIFY` precompile to support secp256r1 curve [#1670](https://github.com/ethereum/execution-spec-tests/pull/1670).
 - ✨ Introduce blockchain tests for benchmark to cover the scenario of pure ether transfers [#1742](https://github.com/ethereum/execution-spec-tests/pull/1742).
 - ✨ [EIP-7934](https://eips.ethereum.org/EIPS/eip-7934): Add test cases for the block RLP max limit of 10MiB ([#1730](https://github.com/ethereum/execution-spec-tests/pull/1730)).

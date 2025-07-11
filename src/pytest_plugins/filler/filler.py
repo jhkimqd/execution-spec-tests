@@ -129,6 +129,17 @@ def pytest_addoption(parser: pytest.Parser):
         ),
     )
     evm_group.addoption(
+        "--t8n-server-url",
+        action="store",
+        dest="t8n_server_url",
+        type=str,
+        default=None,
+        help=(
+            "[INTERNAL USE ONLY] URL of the t8n server to use. Used by framework tests/ci; not "
+            "intended for regular CLI use."
+        ),
+    )
+    evm_group.addoption(
         "--traces",
         action="store_true",
         dest="evm_collect_traces",
@@ -558,17 +569,26 @@ def verify_fixtures_bin(request: pytest.FixtureRequest) -> Path | None:
 
 
 @pytest.fixture(autouse=True, scope="session")
+def t8n_server_url(request: pytest.FixtureRequest) -> str | None:
+    """Return configured t8n server url."""
+    return request.config.getoption("t8n_server_url")
+
+
+@pytest.fixture(autouse=True, scope="session")
 def t8n(
-    request: pytest.FixtureRequest, evm_bin: Path | None
+    request: pytest.FixtureRequest, evm_bin: Path | None, t8n_server_url: str | None
 ) -> Generator[TransitionTool, None, None]:
     """Return configured transition tool."""
+    kwargs = {
+        "trace": request.config.getoption("evm_collect_traces"),
+    }
+    if t8n_server_url is not None:
+        kwargs["server_url"] = t8n_server_url
     if evm_bin is None:
         assert TransitionTool.default_tool is not None, "No default transition tool found"
-        t8n = TransitionTool.default_tool(trace=request.config.getoption("evm_collect_traces"))
+        t8n = TransitionTool.default_tool(**kwargs)
     else:
-        t8n = TransitionTool.from_binary_path(
-            binary_path=evm_bin, trace=request.config.getoption("evm_collect_traces")
-        )
+        t8n = TransitionTool.from_binary_path(binary_path=evm_bin, **kwargs)
     if not t8n.exception_mapper.reliable:
         warnings.warn(
             f"The t8n tool that is currently being used to fill tests ({t8n.__class__.__name__}) "
@@ -775,6 +795,11 @@ def fixture_collector(
     Return configured fixture collector instance used for all tests
     in one test module.
     """
+    # Dynamically load the 'static_filler' and 'solc' plugins if needed
+    if request.config.getoption("fill_static_tests_enabled"):
+        request.config.pluginmanager.import_plugin("pytest_plugins.filler.static_filler")
+        request.config.pluginmanager.import_plugin("pytest_plugins.solc.solc")
+
     fixture_collector = FixtureCollector(
         output_dir=fixture_output.directory,
         flat_output=fixture_output.flat_output,

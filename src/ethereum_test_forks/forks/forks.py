@@ -6,8 +6,6 @@ from os.path import realpath
 from pathlib import Path
 from typing import List, Literal, Mapping, Optional, Sized, Tuple
 
-from semver import Version
-
 from ethereum_test_base_types import AccessList, Address, BlobSchedule, Bytes, ForkBlobSchedule
 from ethereum_test_base_types.conversions import BytesConvertible
 from ethereum_test_vm import EVMCodeType, Opcodes
@@ -45,11 +43,6 @@ class Frontier(BaseFork, solc_name="homestead"):
         if cls._solc_name is not None:
             return cls._solc_name
         return cls.name().lower()
-
-    @classmethod
-    def solc_min_version(cls) -> Version:
-        """Return minimum version of solc that supports this fork."""
-        return Version.parse("0.8.20")
 
     @classmethod
     def header_base_fee_required(cls, block_number: int = 0, timestamp: int = 0) -> bool:
@@ -256,6 +249,13 @@ class Frontier(BaseFork, solc_name="homestead"):
     def max_blobs_per_block(cls, block_number: int = 0, timestamp: int = 0) -> int:
         """Return the max number of blobs per block at a given fork."""
         raise NotImplementedError(f"Max blobs per block is not supported in {cls.name()}")
+
+    @classmethod
+    def full_blob_tx_wrapper_version(cls, block_number: int = 0, timestamp: int = 0) -> int | None:
+        """Return the version of the full blob transaction wrapper."""
+        raise NotImplementedError(
+            f"Full blob transaction wrapper version is not supported in {cls.name()}"
+        )
 
     @classmethod
     def blob_schedule(cls, block_number: int = 0, timestamp: int = 0) -> BlobSchedule | None:
@@ -930,11 +930,6 @@ class Cancun(Shanghai):
         return retrieved_constant
 
     @classmethod
-    def solc_min_version(cls) -> Version:
-        """Return minimum version of solc that supports this fork."""
-        return Version.parse("0.8.24")
-
-    @classmethod
     def header_excess_blob_gas_required(cls, block_number: int = 0, timestamp: int = 0) -> bool:
         """Excess blob gas is required starting from Cancun."""
         return True
@@ -1025,6 +1020,11 @@ class Cancun(Shanghai):
     def max_blobs_per_block(cls, block_number: int = 0, timestamp: int = 0) -> int:
         """Blobs are enabled starting from Cancun, with a static max of 6 blobs."""
         return 6
+
+    @classmethod
+    def full_blob_tx_wrapper_version(cls, block_number: int = 0, timestamp: int = 0) -> int | None:
+        """Pre-Osaka forks don't use tx wrapper versions for full blob transactions."""
+        return None
 
     @classmethod
     def blob_schedule(cls, block_number: int = 0, timestamp: int = 0) -> BlobSchedule | None:
@@ -1130,11 +1130,6 @@ class Prague(Cancun):
         development.
         """
         return False
-
-    @classmethod
-    def solc_min_version(cls) -> Version:
-        """Return minimum version of solc that supports this fork."""
-        return Version.parse("1.0.0")  # set a high version; currently unknown
 
     @classmethod
     def precompiles(cls, block_number: int = 0, timestamp: int = 0) -> List[Address]:
@@ -1393,9 +1388,14 @@ class Osaka(Prague, solc_name="cancun"):
         return 2
 
     @classmethod
+    def full_blob_tx_wrapper_version(cls, block_number=0, timestamp=0) -> int | None:
+        """At Osaka, the full blob transaction wrapper version is defined."""
+        return 1
+
+    @classmethod
     def transaction_gas_limit_cap(cls, block_number: int = 0, timestamp: int = 0) -> int | None:
         """At Osaka, transaction gas limit is capped at 30 million."""
-        return 30_000_000
+        return 16_777_216
 
     @classmethod
     def block_rlp_size_limit(cls, block_number: int = 0, timestamp: int = 0) -> int | None:
@@ -1420,11 +1420,6 @@ class Osaka(Prague, solc_name="cancun"):
         return [
             Opcodes.CLZ,
         ] + super(Prague, cls).valid_opcodes()
-
-    @classmethod
-    def solc_min_version(cls) -> Version:
-        """Return minimum version of solc that supports this fork."""
-        return Version.parse("1.0.0")  # set a high version; currently unknown
 
     @classmethod
     def precompiles(cls, block_number: int = 0, timestamp: int = 0) -> List[Address]:
@@ -1514,8 +1509,3 @@ class EOFv1(Prague, solc_name="cancun"):
         development.
         """
         return False
-
-    @classmethod
-    def solc_min_version(cls) -> Version:
-        """Return minimum version of solc that supports this fork."""
-        return Version.parse("1.0.0")  # set a high version; currently unknown
