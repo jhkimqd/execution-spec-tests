@@ -10,6 +10,23 @@ Test fixtures for use by clients are available for each release on the [Github r
 
 - Python 3.10 support was removed in this release ([#1808](https://github.com/ethereum/execution-spec-tests/pull/1808)).
 
+#### 💥 Important Change for EEST developers
+
+- @ethereum/execution-spec-tests now requires `uv>=0.7.0` ([#1904](https://github.com/ethereum/execution-spec-tests/pull/1904)). If your version of `uv` is too old, please proceed as following.
+
+   If `uv` was curl-installed (recommended), please run:
+
+   ```bash
+   uv self update
+   ```
+
+   If `uv` was pip-installed, then:
+
+   ```bash
+   pip uninstall uv
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+
 #### 💥 Important Change for test contributors
 
 - EEST no longer allows usage of Yul code in Python tests. From now on, please make use of our opcode wrapper. Yul code is now only allowed in the "static tests" located in `./tests/static/` (these are test cases defined by JSON and YAML files instead of Python test functions that were originally maintained in [ethereum/tests](https://github.com/ethereum/tests)).
@@ -21,6 +38,8 @@ The output behavior of `fill` has changed ([#1608](https://github.com/ethereum/e
 
 - Before: `fill` wrote fixtures into the directory specified by the `--output` flag (default: `fixtures`). This could have many unintended consequences, including unexpected errors if old or invalid fixtures existed in the directory (for details see [#1030](https://github.com/ethereum/execution-spec-tests/issues/1030)).
 - Now: `fill` will exit without filling any tests if the specified directory exists and is not-empty. This may be overridden by adding the `--clean` flag, which will first remove the specified directory.
+
+Additionally, writing debugging information to the EVM "dump directory" by default has been disabled. To obtain debug output, the `--evm-dump-dir` flag must now be explicitly set. As a consequence, the now redundant `--skip-evm-dump` option was removed ([#1874](https://github.com/ethereum/execution-spec-tests/pull/1874)). This undoes functionality originally introduced in [#999](https://github.com/ethereum/execution-spec-tests/pull/999) and [#1150](https://github.com/ethereum/execution-spec-tests/pull/1150).
 
 #### Feature `zkevm` updated to `benchmark`
 
@@ -49,6 +68,7 @@ Users can select any of the artifacts depending on their testing needs for their
 - 🐞 `zkevm` marked tests have been removed from `tests-deployed` tox environment into its own separate workflow `tests-deployed-zkevm` and are filled by `evmone-t8n` ([#1617](https://github.com/ethereum/execution-spec-tests/pull/1617)).
 - ✨ Field `postStateHash` is now added to all `blockchain_test` and `blockchain_test_engine` tests that use `exclude_full_post_state_in_output` in place of `postState`. Fixes `evmone-blockchaintest` test consumption and indirectly fixes coverage runs for these tests ([#1667](https://github.com/ethereum/execution-spec-tests/pull/1667)).
 - 🔀 Changed INVALID_DEPOSIT_EVENT_LAYOUT to a BlockException instead of a TransactionException ([#1773](https://github.com/ethereum/execution-spec-tests/pull/1773)).
+- 🔀 Disabled writing debugging information to the EVM "dump directory" to improve performance. To obtain debug output, the `--evm-dump-dir` flag must now be explicitly set. As a consequence, the now redundant `--skip-evm-dump` option was removed ([#1874](https://github.com/ethereum/execution-spec-tests/pull/1874)).
 
 #### `consume`
 
@@ -61,6 +81,7 @@ Users can select any of the artifacts depending on their testing needs for their
 
 - ✨ Added new `Blob` class which can use the ckzg library to generate valid blobs at runtime ([#1614](https://github.com/ethereum/execution-spec-tests/pull/1614)).
 - ✨ Added `blob_transaction_test` execute test spec, which allows tests that send blob transactions to a running client and verifying its `engine_getBlobsVX` endpoint behavior ([#1644](https://github.com/ethereum/execution-spec-tests/pull/1644)).
+- ✨ Added `execute eth-config` command to test the `eth_config` RPC endpoint of a client, and includes configurations by default for Mainnet, Sepolia, Holesky, and Hoodi ([#1863](https://github.com/ethereum/execution-spec-tests/pull/1863)).
 
 ### 📋 Misc
 
@@ -88,6 +109,8 @@ Users can select any of the artifacts depending on their testing needs for their
 - 🔀 Add fixture comparison check to optimize coverage workflow in CI ([#1833](https://github.com/ethereum/execution-spec-tests/pull/1833)).
 - 🔀 Move `TransactionType` enum from test file to proper module location in `ethereum_test_types.transaction_types` for better code organization and reusability ([#1763](https://github.com/ethereum/execution-spec-tests/pull/1673)).
 - ✨ Opcode classes now validate keyword arguments and raise `ValueError` with clear error messages ([#1739](https://github.com/ethereum/execution-spec-tests/pull/1739), [#1856](https://github.com/ethereum/execution-spec-tests/pull/1856)).
+- ✨ All commands (`fill`, `consume`, `execute`) now work without having to clone the repository, e.g. `uv run --with git+https://github.com/ethereum/execution-spec-tests.git consume` now works from any folder ([#1863](https://github.com/ethereum/execution-spec-tests/pull/1863)).
+- 🔀 Enforce a minimum version of `uv>=0.7.0` ([#1904](https://github.com/ethereum/execution-spec-tests/pull/1904)).
 
 ### 🧪 Test Cases
 
