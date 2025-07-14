@@ -1,5 +1,50 @@
 # Execution Spec Tests
 
+## Quickstart
+
+Before proceeding with the guide, if you're looking for a copy&paste command to just run the tests, refer to the below examples:
+
+eip2930_access_list
+```
+uv run execute remote \
+    --fork=Berlin \
+    --rpc-endpoint=$(kurtosis port print op op-el-1-op-geth-op-node-001 rpc) \
+    --rpc-seed-key 0x12d7de8621a77640c9241b2595ba78ce443d05e94090365ab3bb5e19df82c625 \
+    --rpc-chain-id 2151908 \
+    --seed-account-sweep-amount "100 ether" \
+    --json-report \
+    --json-report-file=report.json \
+    ./tests/berlin/eip2930_access_list/test_acl.py
+```
+
+eip6780_selfdestruct
+```
+uv run execute remote \
+    --fork=Cancun \
+    --rpc-endpoint=$(kurtosis port print op op-el-1-op-geth-op-node-001 rpc) \
+    --rpc-seed-key 0x12d7de8621a77640c9241b2595ba78ce443d05e94090365ab3bb5e19df82c625 \
+    --rpc-chain-id 2151908 \
+    --seed-account-sweep-amount "100 ether" \
+    --json-report \
+    --json-report-file=report.json \
+    ./tests/cancun/eip6780_selfdestruct/test_selfdestruct.py
+```
+
+eip2537_bls_12_381_precompiles
+```
+uv run execute remote \
+    --fork=Prague \
+    --rpc-endpoint=$(kurtosis port print op op-el-1-op-geth-op-node-001 rpc) \
+    --rpc-seed-key 0x12d7de8621a77640c9241b2595ba78ce443d05e94090365ab3bb5e19df82c625 \
+    --rpc-chain-id 2151908 \
+    --seed-account-sweep-amount "100 ether" \
+    --json-report \
+    --json-report-file=report.json \
+    ./tests/prague/eip2537_bls_12_381_precompiles/test_bls12_pairing.py
+```
+
+---
+
 [![latest version](https://img.shields.io/github/v/release/ethereum/execution-spec-tests)](https://github.com/ethereum/execution-spec-tests/releases/latest)
 ![Python Versions](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
