@@ -155,22 +155,26 @@ def test_valid_multi_inf(
     extra_gas = 100_000
 
     environment_gas_limit = Environment().gas_limit
+    # RPC transaction size limit (128KB)
+    max_tx_size = 131072
 
     inf_data = Spec.INF_G1 + Spec.INF_G2
     input_data = inf_data
 
     while True:
-        precompile_gas = pairing_gas(len(input_data + inf_data))
+        next_input_data = input_data + inf_data
+        precompile_gas = pairing_gas(len(next_input_data))
         new_tx_gas_limit = (
             extra_gas
-            + intrinsic_gas_cost_calculator(calldata=input_data + inf_data)
-            + memory_expansion_gas_calculator(new_bytes=len(input_data + inf_data))
+            + intrinsic_gas_cost_calculator(calldata=next_input_data)
+            + memory_expansion_gas_calculator(new_bytes=len(next_input_data))
             + precompile_gas
         )
-        if new_tx_gas_limit > environment_gas_limit:
+        # Check both gas limit and transaction size limit
+        if new_tx_gas_limit > environment_gas_limit or len(next_input_data) > max_tx_size:
             break
         tx_gas_limit = new_tx_gas_limit
-        input_data += inf_data
+        input_data = next_input_data
 
     tx = Transaction(
         gas_limit=tx_gas_limit,
@@ -304,22 +308,26 @@ def test_invalid_multi_inf(
     extra_gas = 100_000
 
     environment_gas_limit = Environment().gas_limit
+    # RPC transaction size limit (128KB)
+    max_tx_size = 131072
 
     inf_data = Spec.INF_G1 + Spec.INF_G2
     input_data = PointG1(Spec.P, 0) + Spec.INF_G2
 
     while True:
-        precompile_gas = pairing_gas(len(input_data + inf_data))
+        next_input_data = input_data + inf_data
+        precompile_gas = pairing_gas(len(next_input_data))
         new_tx_gas_limit = (
             extra_gas
-            + intrinsic_gas_cost_calculator(calldata=input_data + inf_data)
-            + memory_expansion_gas_calculator(new_bytes=len(input_data + inf_data))
+            + intrinsic_gas_cost_calculator(calldata=next_input_data)
+            + memory_expansion_gas_calculator(new_bytes=len(next_input_data))
             + precompile_gas
         )
-        if new_tx_gas_limit > environment_gas_limit:
+        # Check both gas limit and transaction size limit
+        if new_tx_gas_limit > environment_gas_limit or len(next_input_data) > max_tx_size:
             break
         tx_gas_limit = new_tx_gas_limit
-        input_data = inf_data + input_data
+        input_data = next_input_data
 
     tx = Transaction(
         gas_limit=tx_gas_limit,
