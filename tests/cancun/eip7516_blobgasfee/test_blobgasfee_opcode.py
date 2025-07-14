@@ -52,7 +52,9 @@ def caller_code(
     callee_address: Address,
 ) -> Bytecode:
     """Bytecode used to call the bytecode containing the BLOBBASEFEE opcode."""
-    return Op.SSTORE(Op.NUMBER, Op.CALL(gas=call_gas, address=callee_address))
+    # print(f"caller_code Op.NUMBER: {Op.NUMBER}")
+    # print(f"caller_code Op.CALL: {Op.CALL(gas=call_gas, address=callee_address)}")
+    return Op.SSTORE(1, Op.CALL(gas=call_gas, address=callee_address))
 
 
 @pytest.fixture
@@ -97,6 +99,8 @@ def test_blobbasefee_stack_overflow(
     call_fails: bool,
 ):
     """Tests that the BLOBBASEFEE opcode produces a stack overflow by using it repeatedly."""
+    print(f"test_blobbasefee_stack_overflow caller_address: {caller_address}")
+    print(f"test_blobbasefee_stack_overflow callee_address: {callee_address}")
     post = {
         caller_address: Account(
             storage={1: 0 if call_fails else 1},
