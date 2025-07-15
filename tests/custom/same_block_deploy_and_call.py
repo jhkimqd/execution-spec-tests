@@ -89,7 +89,7 @@ def test_deploy_and_call_same_block_state_test(
         +
         # Call the contract again to read the stored value
         Op.PUSH1(0x20)  # Return data size
-        + Op.PUSH1(0x00)  # Return data offset (changed from 0x60)
+        + Op.PUSH1(0x00)  # Return data offset
         + Op.PUSH1(0)  # Args size (0 bytes - no calldata for read)
         + Op.PUSH1(0)  # Args offset
         + Op.PUSH1(0)  # Value to send
@@ -98,7 +98,7 @@ def test_deploy_and_call_same_block_state_test(
         + Op.CALL  # Make the call
         +
         # Store the returned value
-        Op.PUSH1(0x00)  # Memory offset where return data was stored (changed from 0x60)
+        Op.PUSH1(0x00)  # Memory offset where return data was stored
         + Op.MLOAD  # Load the returned value
         + Op.PUSH1(3)  # Storage slot 3
         + Op.SSTORE  # Store the returned value
