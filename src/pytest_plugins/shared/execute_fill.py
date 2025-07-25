@@ -1,5 +1,6 @@
 """Shared pytest fixtures and hooks for EEST generation modes (fill and execute)."""
 
+from enum import StrEnum, unique
 from typing import List
 
 import pytest
@@ -7,7 +8,18 @@ import pytest
 from ethereum_test_execution import BaseExecute, LabeledExecuteFormat
 from ethereum_test_fixtures import BaseFixture, LabeledFixtureFormat
 from ethereum_test_specs import BaseTest
-from pytest_plugins.spec_version_checker.spec_version_checker import EIPSpecTestItem
+from ethereum_test_tools import Environment
+from ethereum_test_types import EOA, Alloc
+
+from ..spec_version_checker.spec_version_checker import EIPSpecTestItem
+
+
+@unique
+class OpMode(StrEnum):
+    """Operation mode for the fill and execute."""
+
+    CONSENSUS = "consensus"
+    BENCHMARKING = "benchmarking"
 
 
 @pytest.hookimpl(tryfirst=True)
@@ -58,6 +70,9 @@ def pytest_configure(config: pytest.Config):
                 (f"{marker}: {description}"),
             )
 
+    if not hasattr(config, "op_mode"):
+        config.op_mode = OpMode.CONSENSUS  # type: ignore[attr-defined]
+
     config.addinivalue_line(
         "markers",
         "yul_test: a test case that compiles Yul code.",
@@ -92,6 +107,18 @@ def pytest_configure(config: pytest.Config):
         "markers",
         "derived_test: Mark a test as a derived test (E.g. a BlockchainTest that is derived "
         "from a StateTest).",
+    )
+    config.addinivalue_line(
+        "markers",
+        "tagged: Marks a static test as tagged. Tags are used to generate dynamic "
+        "addresses for static tests at fill time. All tagged tests are compatible with "
+        "dynamic address generation.",
+    )
+    config.addinivalue_line(
+        "markers",
+        "untagged: Marks a static test as untagged. Tags are used to generate dynamic "
+        "addresses for static tests at fill time. Untagged tests are incompatible with "
+        "dynamic address generation.",
     )
 
 
@@ -150,6 +177,13 @@ def pytest_runtest_call(item: pytest.Item):
         )
 
 
+# Global `sender` fixture that can be overridden by tests.
+@pytest.fixture
+def sender(pre: Alloc) -> EOA:
+    """Fund an EOA from pre-alloc."""
+    return pre.fund_eoa()
+
+
 def pytest_addoption(parser: pytest.Parser):
     """Add command-line options to pytest."""
     static_filler_group = parser.getgroup("static", "Arguments defining static filler behavior")
@@ -160,3 +194,8 @@ def pytest_addoption(parser: pytest.Parser):
         default=None,
         help=("Enable reading and filling from static test files."),
     )
+
+
+@pytest.fixture
+def env(request: pytest.FixtureRequest) -> Environment:  # noqa: D103
+    return Environment()

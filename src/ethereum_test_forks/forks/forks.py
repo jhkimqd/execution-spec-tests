@@ -680,9 +680,9 @@ class Byzantium(Homestead):
         """
         return [
             Address(5, label="MODEXP"),
-            Address(6, label="BN256_ADD"),
-            Address(7, label="BN256_MUL"),
-            Address(8, label="BN256_PAIRING"),
+            Address(6, label="BN254_ADD"),
+            Address(7, label="BN254_MUL"),
+            Address(8, label="BN254_PAIRING"),
         ] + super(Byzantium, cls).precompiles(block_number, timestamp)
 
     @classmethod
@@ -1152,14 +1152,6 @@ class Prague(Cancun):
     }
 
     @classmethod
-    def is_deployed(cls) -> bool:
-        """
-        Flag that the fork has not been deployed to mainnet; it is under active
-        development.
-        """
-        return False
-
-    @classmethod
     def precompiles(cls, block_number: int = 0, timestamp: int = 0) -> List[Address]:
         """
         At Prague, pre-compile for BLS operations are added.
@@ -1487,7 +1479,7 @@ class Osaka(Prague, solc_name="cancun"):
         blob_gas_per_blob = cls.blob_gas_per_blob(block_number, timestamp)
         target_blob_gas_per_block = target_blobs_per_block * blob_gas_per_blob
         max_blobs_per_block = cls.max_blobs_per_block(block_number, timestamp)
-        blob_base_cost = 2**14  # EIP-7918 new parameter
+        blob_base_cost = 2**13  # EIP-7918 new parameter
 
         def fn(
             *,
