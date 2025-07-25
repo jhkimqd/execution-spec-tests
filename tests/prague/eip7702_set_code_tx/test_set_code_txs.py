@@ -107,11 +107,13 @@ def test_self_sponsored_set_code(
     )
 
     tx = Transaction(
-        gas_limit=10_000_000,
+        gas_limit=15000000,
+        gas_price=1100000,
         to=sender,
         value=tx_value,
         authorization_list=[
             AuthorizationTuple(
+                chainid=0x20D5E4,
                 address=set_code_to_address,
                 nonce=1,
                 signer=sender,
@@ -191,6 +193,7 @@ def test_set_code_to_sstore(
         value=tx_value,
         authorization_list=[
             AuthorizationTuple(
+                chainid=0x20D5E4,
                 address=set_code_to_address,
                 nonce=1 if self_sponsored else 0,
                 signer=auth_signer,
@@ -294,7 +297,7 @@ def test_set_code_to_sstore_then_sload(
     )
 
     tx_2 = Transaction(
-        gas_limit=100_000,
+        gas_limit=100_000_000,
         to=auth_signer,
         value=0,
         authorization_list=[

@@ -36,7 +36,7 @@ pytestmark = pytest.mark.valid_from("Prague")
                         DepositRequest(
                             pubkey=0x01,
                             withdrawal_credentials=0x02,
-                            amount=32_000_000_000,
+                            amount=100_000,
                             signature=0x03,
                             index=0x0,
                         )

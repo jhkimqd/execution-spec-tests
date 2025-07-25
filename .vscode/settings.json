@@ -11,7 +11,7 @@
         "internal-terms": false
     },
     "[json]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "editor.defaultFormatter": "vscode.json-language-features"
     },
     "[python]": {
         "editor.rulers": [100],

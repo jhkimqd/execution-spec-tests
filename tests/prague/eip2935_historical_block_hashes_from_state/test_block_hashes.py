@@ -119,7 +119,7 @@ def test_block_hashes_history_at_transition(
     blocks: List[Block] = []
     assert blocks_before_fork >= 1 and blocks_before_fork < Spec.FORK_TIMESTAMP
 
-    sender = pre.fund_eoa(10_000_000_000)
+    sender = pre.fund_eoa(10_000_000)
     post: Dict[Address, Account] = {}
     current_block_number = 1
     fork_block_number = current_block_number + blocks_before_fork
@@ -234,7 +234,7 @@ def test_block_hashes_history(
     """
     blocks: List[Block] = []
 
-    sender = pre.fund_eoa(10_000_000_000)
+    sender = pre.fund_eoa(10_000_000_000_000_000)
     post: Dict[Address, Account] = {}
     current_block_number = 1
     fork_block_number = 0  # We fork at genesis
